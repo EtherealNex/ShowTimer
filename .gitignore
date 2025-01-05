@@ -1,0 +1,29 @@
+# Python bytecode files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+Icon?
+ehthumbs.db
+
+# VS Code
+.vscode/
+
+# JetBrains IDEs (e.g., PyCharm, IntelliJ)
+.idea/
+
+# Other unwanted files
+*.log
+*.bak
+*.swp
+*.swo
+
+# Environment files
+.env
+.venv/
