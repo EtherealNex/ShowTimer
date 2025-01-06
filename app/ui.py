@@ -6,15 +6,18 @@ class App:
         self.root = root
         self.root.title("Show Timer")
         self.root.geometry("800x500")
+        self.default_bg = self.root.cget("bg")
+
+        # Please change to be your show name
+        self.show_name = ""
 
         # Settings
-        self.inteveral_time = 900 # Possible upgrade to allow multiple intervals.
+        self.inteveral_time = 900
         self.calls = [["Quarter", 900],["Five", 300],["Beginners", 300]]
         self.call_timers = []
         self.interval_over = False
 
-        self.current_call = 0 # Gives controll on what timer is next.
-
+        self.current_call = 0 
         # Initilise Timers
         self.form = formatter()
         self.running_time_timer = Stopwatch()
@@ -89,7 +92,7 @@ class App:
                 self.current_call_timer_label.config(text="", font=("Helvetica", 0))
                 self.is_calls_visible = False
 
-        def changeToMain(): # This function needs to save (print for now) when cues were pressed
+        def changeToMain(): 
             self.localtime.stop()
 
             self.act_1_start = time.localtime()
@@ -99,10 +102,9 @@ class App:
                 self.root.after_cancel(task)
                 task = None
 
-            for allTimers in self.call_timers: # Cancel Any Running Timers and print start stop values to terminal (later json)
+            for allTimers in self.call_timers: # Cancel Any Running Timers
                 if allTimers.get_running():
                     allTimers.stop()
-                print(allTimers.StartEndLocal())
             
             self.clearWindow()
             self.mainShowWindow()
@@ -246,10 +248,20 @@ class App:
             self.begginers_time_label.config(text=self.act_2_begginers.get_time())
             self.interval_countdown_lable.config(text=self.inteveral_timer.get_time())
             self.local_timer_label.config(text=self.localtime.get_time())
+
+            # Function to update screen colour if timer approches 0
+            time_left = self.inteveral_timer.get_remaining_time()
+            if time_left <= 300 and time_left > 0:
+                self.root.config(bg="#FFA500")
+            elif time_left <= 0:
+                self.root.config(bg="red")
+
+
             self.interval_tasks.append(self.root.after(1000, update_timers))
 
         def end_interval():
             self.interval_End = self.act_2_start = time.localtime()
+            self.root.config(bg=self.default_bg)
 
             for task in self.interval_tasks:
                 self.root.after_cancel(task)
@@ -258,7 +270,6 @@ class App:
             self.clearWindow()
             self.root.update_idletasks()
             self.mainShowWindow()
-            print("Ending Interal")
 
         self.begginers_label = tk.Label(self.root, text="Begginers", font=("Helvetica", 16), fg="lightgrey")
         self.begginers_label.pack(pady=5)
@@ -285,10 +296,89 @@ class App:
     def showInsights(self):
 
         def saveToJSON():
-            print("Running Save To JSON")
+            import json, os
+
+            filename = f"app/userdata/{self.show_name}.json"
+
+            if os.path.exists(filename):
+                with open(filename, "r") as json_file:
+                    show_data = json.load(json_file)
+            
+            else:
+                show_data = {}
+
+            next_show_key = f"Show{len(show_data) + 1}"
+
+            new_show_data = {
+                "act_1" : {
+                    "start" : f"{time.strftime("%H:%M:%S", self.act_1_start)}",
+                    "end" : f"{time.strftime("%H:%M:%S", self.act_1_end)}",
+                    "running_time" : f"{self.form.delta_time(self.act_1_start, self.act_1_end)}"
+                },
+
+                "interval" : {
+                    "start" : f"{time.strftime("%H:%M:%S", self.interval_start)}",
+                    "end" : f"{time.strftime("%H:%M:%S", self.interval_End)}",
+                    "running_time" : f"{self.form.delta_time(self.interval_start, self.interval_End)}"
+                },
+
+                "act_2" : {
+                    "start" : f"{time.strftime("%H:%M:%S", self.act_2_start)}",
+                    "end" : f"{time.strftime("%H:%M:%S", self.act_2_end)}",
+                    "running_time" : f"{self.form.delta_time(self.act_2_start, self.act_2_end)}"
+                },
+
+                "show_details" : {
+                    "total_running_time" : f"{self.running_time_timer.get_time()}",
+                    "show_stopped" : f"{self.show_stop_timer.get_time()}",
+                    "stage_time" : f"{self.form.format_secs((time.mktime(self.act_1_end) - time.mktime(self.act_1_start)) + (time.mktime(self.act_2_end) - time.mktime(self.act_2_start)))}"
+                }
+            }
+
+            show_data[next_show_key] = new_show_data
+
+            with open(filename, "w") as json_file:
+                json.dump(show_data, json_file, indent=4)
+
+            print(f"Show Saved To {filename}, under {next_show_key}.")
+            startNewShow() # To prevent saving twice.
 
         def startNewShow():
-            print("Starting New Show")
+            self.clearWindow()
+
+            # Re init all vars needed.
+            # Settings
+            self.inteveral_time = 900
+            self.calls = [["Quarter", 900],["Five", 300],["Beginners", 300]]
+            self.call_timers = []
+            self.interval_over = False
+
+            self.current_call = 0 
+            # Initilise Timers
+            self.form = formatter()
+            self.running_time_timer = Stopwatch()
+            self.show_stop_timer = Stopwatch()
+            self.inteveral_timer = Timer(self.inteveral_time, False)
+            self.act_2_begginers = Timer((self.inteveral_time - 300), True)
+            
+            for name, duration in self.calls:
+                newCallTimer = Timer(duration, True)
+                self.call_timers.append(newCallTimer)
+
+            self.localtime = LocalTime()
+
+            # Allows to track when
+            self.act_1_start = None
+            self.act_1_end = None
+
+            self.act_2_start = None
+            self.act_2_end = None
+
+            self.interval_start = None
+            self.interval_End = None
+
+            # Goto pre show page
+            self.preShow()
 
         self.insight_headder_lable = tk.Label(self.root, text="Show Insights", font=("Helvetica", 36, "bold"))
         self.insight_headder_lable.pack(side="top", pady=5)

@@ -27,3 +27,6 @@ ehthumbs.db
 # Environment files
 .env
 .venv/
+
+# User Data
+*.json
