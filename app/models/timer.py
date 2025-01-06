@@ -129,6 +129,9 @@ class Timer(formatter):
     def get_time(self):
         return self.format_secs(self._remaining_time)
     
+    def get_remaining_time(self):
+        return self._remaining_time # returns remaining time in seconds
+    
     def get_running(self):
         return self._running
     

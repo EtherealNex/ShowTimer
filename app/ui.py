@@ -5,7 +5,7 @@ class App:
     def __init__(self, root):
         self.root = root
         self.root.title("Show Timer")
-        self.root.geometry("800x450")
+        self.root.geometry("800x500")
 
         # Settings
         self.inteveral_time = 900 # Possible upgrade to allow multiple intervals.
@@ -16,6 +16,7 @@ class App:
         self.current_call = 0 # Gives controll on what timer is next.
 
         # Initilise Timers
+        self.form = formatter()
         self.running_time_timer = Stopwatch()
         self.show_stop_timer = Stopwatch()
         self.inteveral_timer = Timer(self.inteveral_time, False)
@@ -190,6 +191,7 @@ class App:
             # There is no need to stop timers as most must stay running while the show is running.
 
         def endshow():
+            self.act_2_end = time.localtime()
             self.running_time_timer.stop()
             self.show_stop_timer.stop()
             self.localtime.stop()
@@ -281,15 +283,66 @@ class App:
 
 
     def showInsights(self):
-        print("Show Insights")
-        print(self.act_1_start, self.act_1_end)
-        print(self.interval_start, self.interval_End)
-        print(self.act_2_start, self.act_2_end)
 
-        print(self.running_time_timer.get_time())
-        print(self.show_stop_timer.get_time())
+        def saveToJSON():
+            print("Running Save To JSON")
 
-        print("Interval Time")
-        f = formatter()
-        delattime = f.delta_time(self.interval_start, self.interval_End)
-        print(delattime)
+        def startNewShow():
+            print("Starting New Show")
+
+        self.insight_headder_lable = tk.Label(self.root, text="Show Insights", font=("Helvetica", 36, "bold"))
+        self.insight_headder_lable.pack(side="top", pady=5)
+
+        self.Act1_label = tk.Label(self.root, text="Act 1:", font=("Helvetica", 24))
+        self.Act1_label.pack(anchor='w', padx=20)
+
+        self.act1_details_labels = tk.Label(self.root, text=f"Start: {time.strftime("%H:%M:%S", self.act_1_start)} | End: {time.strftime("%H:%M:%S", self.act_1_end)} \n {self.form.delta_time(self.act_1_start, self.act_1_end)}",
+                                             font=("Helvetica", 20))
+        self.act1_details_labels.pack(anchor='center', padx=40)
+
+        self.interval_label = tk.Label(self.root, text="Interval:", font=("Helvetica", 24))
+        self.interval_label.pack(anchor='w', padx=20)
+
+        self.interval_details_label = tk.Label(self.root, text=f"Start: {time.strftime("%H:%M:%S", self.interval_start)} | End: {time.strftime("%H:%M:%S", self.interval_End)} \n {self.form.delta_time(self.interval_start, self.interval_End)}",
+                                               font=("Helvetica", 20))
+        self.interval_details_label.pack(anchor='center', padx=40)
+
+
+        self.Act2_label = tk.Label(self.root, text="Act 2:", font=("Helvetica", 24))
+        self.Act2_label.pack(anchor='w', padx=20)
+
+        self.act2_details_labels = tk.Label(self.root, text=f"Start: {time.strftime("%H:%M:%S", self.act_2_start)} | End: {time.strftime("%H:%M:%S", self.act_2_end)} \n {self.form.delta_time(self.act_2_start, self.act_2_end)}",
+                                            font=("Helvetica", 20))
+        self.act2_details_labels.pack(anchor='center', padx=40)
+
+        self.divider = tk.Frame(self.root, height=1, bg='lightgrey')
+        self.divider.pack(fill='x', padx=20, pady=10)
+
+        self.show_total_time_label = tk.Label(self.root, text=f"Total Running Time: {self.running_time_timer.get_time()}", font=("Helvetica", 20))
+        self.show_total_time_label.pack(anchor='center')
+
+        self.show_stop_time_lable = tk.Label(self.root, text=f'Show Stopped Time: {self.show_stop_timer.get_time()}', font=("Helvetica", 20))
+        self.show_stop_time_lable.pack(anchor='center')
+
+        button_frame = tk.Frame(self.root)
+        button_frame.pack(side="bottom", pady=10)
+
+        # Save to JSON Button
+        self.save_to_system_button = tk.Button(
+            button_frame, 
+            text="Save to JSON", 
+            font=("Helvetica", 14), 
+            width=15, 
+            command=saveToJSON
+        )
+        self.save_to_system_button.grid(column=0, row=0, padx=5)
+
+        # Start New Show Button
+        self.new_show_button = tk.Button(
+            button_frame, 
+            text="Start New Show", 
+            font=("Helvetica", 14), 
+            width=15, 
+            command=startNewShow
+        )
+        self.new_show_button.grid(column=1, row=0, padx=5)
