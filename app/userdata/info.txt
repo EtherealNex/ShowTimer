@@ -1,0 +1,6 @@
+Hey! so i am still working on a little bit todo with saving the json file data.
+
+I am going to create another file in here for managing the json file to lighten the UI file, to keep it more centeral for UI
+insted of a few other functions.
+
+This file is mainly here so github will recognise the folder and create it so when downloading it wont cause errors.
