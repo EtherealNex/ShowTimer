@@ -9,15 +9,16 @@ class App:
         self.default_bg = self.root.cget("bg")
 
         # Please change to be your show name
-        self.show_name = ""
+        self.show_name = "My Show"
+        self.settings_open = False
 
         # Settings
         self.inteveral_time = 900
         self.calls = [["Quarter", 900],["Five", 300],["Beginners", 300]]
         self.call_timers = []
         self.interval_over = False
-
         self.current_call = 0 
+
         # Initilise Timers
         self.form = formatter()
         self.running_time_timer = Stopwatch()
@@ -109,6 +110,12 @@ class App:
             self.clearWindow()
             self.mainShowWindow()
 
+        def openSettings():
+            if self.settings_open == False:
+                self.setting_menu()
+                self.settings_open = True
+
+
         self.preShow_tasks = []
 
         self.call_frame = tk.Frame(self.root)
@@ -139,8 +146,14 @@ class App:
         self.local_timer_label = tk.Label(self.center_frame, text="00:00:00", font=("Helvetica", 42), fg='lightgrey')
         self.local_timer_label.pack()
 
-        self.start_show_button = tk.Button(self.root, text="Start Show", font=("Helvetica", 14), width=15, command=changeToMain)
-        self.start_show_button.pack(side='bottom', pady=20)
+        button_frame = tk.Frame(self.root)
+        button_frame.pack(side="bottom", pady=10)
+
+        self.start_show_button = tk.Button(button_frame, text="Start Show", font=("Helvetica", 14), width=15, command=changeToMain)
+        self.start_show_button.grid(column=0, row=0, padx=5)
+
+        self.settings_window_button = tk.Button(button_frame, text="Settings", font=("Helvetica", 14), width=15, command=openSettings)
+        self.settings_window_button.grid(column=1, row=0, padx=5)
         
         self.localtime.start()
         update_local_timer()
@@ -436,3 +449,81 @@ class App:
             command=startNewShow
         )
         self.new_show_button.grid(column=1, row=0, padx=5)
+
+    def setting_menu(self):
+        new_window = tk.Tk()
+        new_window.geometry("450x450")
+        new_window.resizable(False, False)
+        new_window.title("Show Timer Settings")
+
+        # If window closed, then allow it to open again.
+        def on_destroy(event):
+            if event.widget != new_window:
+                return
+            self.settings_open = False
+            self.root.update()
+        new_window.bind("<Destroy>", on_destroy)
+
+        def save_settings():
+            self.show_name = self.show_name_textbox.get()
+
+            try:
+                new_interval_time = float(self.interval_length_textbox.get())
+                integer_val = new_interval_time
+
+                self.inteveral_time = integer_val * 60
+                self.inteveral_timer = Timer(self.inteveral_time, False)
+
+                self.act_2_begginers = Timer((self.inteveral_time - 300), True)
+
+            except ValueError:
+                print("ERROR: Non-Float Input")
+
+            try:
+                import ast
+                new_list_string = self.pre_call_textbox.get()
+                new_list = ast.literal_eval(new_list_string)
+
+                self.calls = new_list
+                self.call_timers = []
+
+                for name, duration in self.calls:
+                    newCallTimer = Timer(duration, True)
+                    self.call_timers.append(newCallTimer)
+
+                self.next_call_label.config(text=f"Next Cue: {self.calls[0][0]} - {self.calls[0][1]} Mins")
+            
+            except Exception as e:
+                print("Most Likely you dont understand python 2d arrays so we quit this action.")
+
+            new_window.destroy()
+            self.root.update()
+
+        header_label = tk.Label(new_window, text="Settings", font=("Helvetica", 30))
+        header_label.pack(anchor='center', pady=10)
+
+        # Save Button
+        self.save_button = tk.Button(new_window,text="Save", font=("Helvetica", 14), width=15, command=save_settings)
+        self.save_button.pack(side="bottom", pady=5)
+
+        self.show_name_lable = tk.Label(new_window, text="Show Name:", font=("Helvetica", 16))
+        self.show_name_lable.pack(pady=5, anchor='w', padx=20)
+
+        self.show_name_textbox = tk.Entry(new_window, width=30)
+        self.show_name_textbox.pack()
+        self.show_name_textbox.insert(0, self.show_name)
+
+        self.interval_time_label = tk.Label(new_window, text="Interval Lenghth:", font=("Helvetica", 16)).pack(pady=5, anchor='w', padx=20)
+        self.interval_length_textbox = tk.Entry(new_window, width=30)
+        self.interval_length_textbox.pack()
+        self.interval_length_textbox.insert(0, (self.inteveral_time / 60))
+
+        self.pre_call_timers_label = tk.Label(new_window, text="Pre-Show Timers (Recomended to leave defult):", font=("Helvetica", 16)).pack(pady=5, anchor='w', padx=20)
+
+        self.pre_call_textbox = tk.Entry(new_window, width=30)
+        self.pre_call_textbox.pack()
+        self.pre_call_textbox.insert(0, (str(self.calls)))
+        
+
+
+
