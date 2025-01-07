@@ -126,7 +126,7 @@ class App:
                                           relief="solid", borderwidth=2, fg="black", bg="white", activeforeground="black", activebackground="white")
         self.show_call_button.pack(side="top", pady=10)
 
-        self.next_call_label = tk.Label(self.call_frame, text=f"Next Call: {self.calls[0][0]} - {self.calls[0][1] / 60} Mins", fg="lightgrey",font=("Helvetica", 14))
+        self.next_call_label = tk.Label(self.call_frame, text=f"Next Call: {self.calls[0][0]} - {round((self.calls[0][1] / 60), 2)} Mins", fg="lightgrey",font=("Helvetica", 14))
         self.next_call_label.pack()
 
         self.current_call_label = tk.Label(self.call_frame, text="Current Call:", font=("Helvetica", 16))
@@ -361,8 +361,6 @@ class App:
 
             # Re init all vars needed.
             # Settings
-            self.inteveral_time = 900
-            self.calls = [["Quarter", 900],["Five", 300],["Beginners", 300]]
             self.call_timers = []
             self.interval_over = False
 
@@ -491,7 +489,7 @@ class App:
                     newCallTimer = Timer(duration, True)
                     self.call_timers.append(newCallTimer)
 
-                self.next_call_label.config(text=f"Next Cue: {self.calls[0][0]} - {self.calls[0][1]} Mins")
+                self.next_call_label.config(text=f"Next Cue: {self.calls[0][0]} - {round((self.calls[0][1] / 60), 2)} Mins")
             
             except Exception as e:
                 print("Most Likely you dont understand python 2d arrays so we quit this action.")
